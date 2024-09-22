@@ -33,6 +33,10 @@ public class ClassSchedule {
     private final String SUBJECTID_COL_HEADER = "subjectid";
     
     public String convertCsvToJsonString(List<String[]> csv) {
+        ClassSchedule cs = new ClassSchedule();
+        cs.getInputFileData(CSV_FILENAME);
+        List<String[]> gotcsv = cs.getCsv(cs.getInputFileData(CSV_FILENAME));
+        cs.getCsvString(gotcsv);
         
         return ""; // remove this!
         
@@ -118,6 +122,95 @@ public class ClassSchedule {
         
         return buffer.toString();
         
+    }
+    
+    public void test(){
+        ClassSchedule cs = new ClassSchedule();
+        List<String []> readCsvFile = cs.getCsv();
+        //String CsvToString = cs.getCsvString(readCsvFile);
+        ArrayList<HashMap> schedType = new ArrayList<>();
+        ArrayList<HashMap> subj = new ArrayList<>();
+        ArrayList<HashMap> course = new ArrayList<>();
+        ArrayList<HashMap> section = new ArrayList<>();
+        
+        ArrayList<ArrayList> convertedToJson = new ArrayList<>();
+        
+        //JsonObject jsObj = new JsonObject();
+        
+        
+        for(String[] row : readCsvFile){
+            HashMap<String, String> CsvHMap = new HashMap<>();
+            CsvHMap.put(row[5], row[11]);
+            if(!schedType.contains(CsvHMap)){
+              schedType.add(CsvHMap);  
+            }           
+        }
+        
+        for(String[] row : readCsvFile){
+            HashMap<String, String> CsvHMap = new HashMap<>();
+            CsvHMap.put(row[2].replaceAll("\\d","").trim(), row[1]);
+            if(!subj.contains(CsvHMap)){
+              subj.add(CsvHMap);  
+            }           
+        }
+        
+        for(String[] row : readCsvFile){
+            ArrayList<HashMap> temp = new ArrayList<>();
+            HashMap<String, String> CsvHMap = new HashMap<>();
+            HashMap<String, ArrayList> fHMap = new HashMap<>();
+            CsvHMap.put(CREDITS_COL_HEADER, row[6]);
+            CsvHMap.put(DESCRIPTION_COL_HEADER, row[3]);
+            CsvHMap.put(NUM_COL_HEADER, row[2].replaceAll("[^0-9]", ""));
+            CsvHMap.put(SUBJECTID_COL_HEADER, row[2].replaceAll("\\d","").trim());
+            
+            temp.add(CsvHMap);
+            
+            fHMap.put(row[2], temp);
+            if(!course.contains(fHMap)){
+                course.add(fHMap);
+            }
+        }
+        
+        for(String[] row : readCsvFile){
+            HashMap<String, String> CsvHMap = new HashMap<>();
+            CsvHMap.put(CRN_COL_HEADER,row[0]);
+            CsvHMap.put(SUBJECTID_COL_HEADER,row[2].replaceAll("\\d","").trim());   
+            CsvHMap.put(NUM_COL_HEADER,row[2].replaceAll("[^0-9]", ""));   
+            CsvHMap.put(SECTION_COL_HEADER,row[4]);   
+            CsvHMap.put(TYPE_COL_HEADER,row[5]);   
+            CsvHMap.put(START_COL_HEADER,row[7]);   
+            CsvHMap.put(END_COL_HEADER, row[8]);   
+            CsvHMap.put(DAYS_COL_HEADER, row[9]);   
+            CsvHMap.put(WHERE_COL_HEADER, row[10]);   
+            CsvHMap.put(INSTRUCTOR_COL_HEADER, row[12]);
+            if(!section.contains(CsvHMap));{
+                section.add(CsvHMap);
+            }
+        }
+        
+        //jsonCsv.put(CRN_COL_HEADER, readCsvFile.);
+        /*for(int x = 1; x < schedType.size(); x++){
+            System.out.println(schedType.get(x));
+        }
+        for(int x = 1; x < subj.size(); x++){
+            System.out.println(subj.get(x));
+        }*/
+        
+        /*for(int x = 1; x < course.size(); x++){
+            System.out.println(course.get(x));
+        }*/
+        
+        /*for(int x = 1; x < section.size(); x++){
+            System.out.println(section.get(x));
+        }*/
+        convertedToJson.add(schedType);
+        convertedToJson.add(subj);
+        convertedToJson.add(course);
+        convertedToJson.add(section);
+        
+        for(int x = 0; x < convertedToJson.size(); x++){
+            System.out.println(convertedToJson.get(x));
+        }
     }
     
 }
