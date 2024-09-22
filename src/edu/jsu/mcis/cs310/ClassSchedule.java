@@ -34,15 +34,93 @@ public class ClassSchedule {
     
     public String convertCsvToJsonString(List<String[]> csv) {
         ClassSchedule cs = new ClassSchedule();
-        cs.getInputFileData(CSV_FILENAME);
-        List<String[]> gotcsv = cs.getCsv(cs.getInputFileData(CSV_FILENAME));
-        cs.getCsvString(gotcsv);
+        List<String []> readCsvFile = cs.getCsv();
         
-        return ""; // remove this!
+        JsonObject convertedToJson = new JsonObject();
+        
+        JsonObject sched = new JsonObject();
+        JsonObject subj = new JsonObject();
+        JsonObject course = new JsonObject();
+        JsonArray section = new JsonArray();
+
+        for(String[] row : readCsvFile){
+            String key = row[5]; 
+            String value = row[11];
+            if(!sched.containsKey(key) && !key.equals("type")){
+              sched.put(key,value);  
+            }           
+        }
+        
+        for(String[] row : readCsvFile){
+            String key = row[2].replaceAll("\\d","").trim();
+            String value = row[1];
+            if(!subj.containsKey(key) && !key.equals("num")){
+              subj.put(key, value);  
+            }           
+        }
+        
+
+        for(String[] row : readCsvFile){
+            String classNum = row[2];
+            String credit = CREDITS_COL_HEADER;
+            String credValue = row[6];
+            String desc = DESCRIPTION_COL_HEADER;
+            String descValue = row[3];
+            String numKey = NUM_COL_HEADER;
+            String numValue = row[2].replaceAll("[^0-9]", "");
+            String subjId = SUBJECTID_COL_HEADER;
+            String subjIdValue = row[2].replaceAll("\\d","").trim();
+            
+            JsonObject temp = new JsonObject();
+            temp.put(subjId, subjIdValue);
+            temp.put(numKey, numValue);
+            temp.put(desc, descValue);
+            temp.put(credit, credValue);
+            
+            course.put(classNum, temp);
+            
+        }
+        
+        for(String[] row : readCsvFile){
+            String crn = CRN_COL_HEADER; String crnVal = row[0];
+            String subjId = SUBJECTID_COL_HEADER; String subjIdVal = row[2].replaceAll("\\d","").trim();   
+            String numKey = NUM_COL_HEADER; String numVal = row[2].replaceAll("[^0-9]", "");   
+            String sect = SECTION_COL_HEADER; String sectVal = row[4];   
+            String type = TYPE_COL_HEADER; String typeVal = row[5];   
+            String srt = START_COL_HEADER; String srtVal = row[7];   
+            String ed = END_COL_HEADER; String edVal = row[8];   
+            String days = DAYS_COL_HEADER; String daysVal = row[9];   
+            String where = WHERE_COL_HEADER; String whereVal = row[10];   
+            String inst = INSTRUCTOR_COL_HEADER; String instVal = row[12];
+            
+            JsonObject temp = new JsonObject(); 
+            temp.put(crn, crnVal);
+            temp.put(subjId, subjIdVal);
+            temp.put(numKey, numVal);
+            temp.put(sect, sectVal);
+            temp.put(type, typeVal);
+            temp.put(srt, srtVal);
+            temp.put(ed, edVal);
+            temp.put(days, daysVal);
+            temp.put(where, whereVal);
+            temp.put(inst, instVal);
+            if(!temp.containsValue("instructor")){
+                section.add(temp);
+            }
+        }
+        
+
+        convertedToJson.put("scheduletype", sched);
+        convertedToJson.put("subject", subj);
+        convertedToJson.put("course", course);
+        convertedToJson.put("section", section);
+        
+        return convertedToJson.toJson(); // remove this!
         
     }
     
     public String convertJsonToCsvString(JsonObject json) {
+        
         
         return ""; // remove this!
         
@@ -126,91 +204,14 @@ public class ClassSchedule {
     
     public void test(){
         ClassSchedule cs = new ClassSchedule();
-        List<String []> readCsvFile = cs.getCsv();
-        //String CsvToString = cs.getCsvString(readCsvFile);
-        ArrayList<HashMap> schedType = new ArrayList<>();
-        ArrayList<HashMap> subj = new ArrayList<>();
-        ArrayList<HashMap> course = new ArrayList<>();
-        ArrayList<HashMap> section = new ArrayList<>();
+        JsonObject gotJson = new JsonObject();
+        JsonObject deserialize = new JsonObject();
+        gotJson = cs.getJson();
+        deserialize = cs.getJson(gotJson.toJson());
         
-        ArrayList<ArrayList> convertedToJson = new ArrayList<>();
+        ArrayList<String> csvlist = new ArrayList();
         
-        //JsonObject jsObj = new JsonObject();
+        System.out.println(deserialize);
         
-        
-        for(String[] row : readCsvFile){
-            HashMap<String, String> CsvHMap = new HashMap<>();
-            CsvHMap.put(row[5], row[11]);
-            if(!schedType.contains(CsvHMap)){
-              schedType.add(CsvHMap);  
-            }           
-        }
-        
-        for(String[] row : readCsvFile){
-            HashMap<String, String> CsvHMap = new HashMap<>();
-            CsvHMap.put(row[2].replaceAll("\\d","").trim(), row[1]);
-            if(!subj.contains(CsvHMap)){
-              subj.add(CsvHMap);  
-            }           
-        }
-        
-        for(String[] row : readCsvFile){
-            ArrayList<HashMap> temp = new ArrayList<>();
-            HashMap<String, String> CsvHMap = new HashMap<>();
-            HashMap<String, ArrayList> fHMap = new HashMap<>();
-            CsvHMap.put(CREDITS_COL_HEADER, row[6]);
-            CsvHMap.put(DESCRIPTION_COL_HEADER, row[3]);
-            CsvHMap.put(NUM_COL_HEADER, row[2].replaceAll("[^0-9]", ""));
-            CsvHMap.put(SUBJECTID_COL_HEADER, row[2].replaceAll("\\d","").trim());
-            
-            temp.add(CsvHMap);
-            
-            fHMap.put(row[2], temp);
-            if(!course.contains(fHMap)){
-                course.add(fHMap);
-            }
-        }
-        
-        for(String[] row : readCsvFile){
-            HashMap<String, String> CsvHMap = new HashMap<>();
-            CsvHMap.put(CRN_COL_HEADER,row[0]);
-            CsvHMap.put(SUBJECTID_COL_HEADER,row[2].replaceAll("\\d","").trim());   
-            CsvHMap.put(NUM_COL_HEADER,row[2].replaceAll("[^0-9]", ""));   
-            CsvHMap.put(SECTION_COL_HEADER,row[4]);   
-            CsvHMap.put(TYPE_COL_HEADER,row[5]);   
-            CsvHMap.put(START_COL_HEADER,row[7]);   
-            CsvHMap.put(END_COL_HEADER, row[8]);   
-            CsvHMap.put(DAYS_COL_HEADER, row[9]);   
-            CsvHMap.put(WHERE_COL_HEADER, row[10]);   
-            CsvHMap.put(INSTRUCTOR_COL_HEADER, row[12]);
-            if(!section.contains(CsvHMap));{
-                section.add(CsvHMap);
-            }
-        }
-        
-        //jsonCsv.put(CRN_COL_HEADER, readCsvFile.);
-        /*for(int x = 1; x < schedType.size(); x++){
-            System.out.println(schedType.get(x));
-        }
-        for(int x = 1; x < subj.size(); x++){
-            System.out.println(subj.get(x));
-        }*/
-        
-        /*for(int x = 1; x < course.size(); x++){
-            System.out.println(course.get(x));
-        }*/
-        
-        /*for(int x = 1; x < section.size(); x++){
-            System.out.println(section.get(x));
-        }*/
-        convertedToJson.add(schedType);
-        convertedToJson.add(subj);
-        convertedToJson.add(course);
-        convertedToJson.add(section);
-        
-        for(int x = 0; x < convertedToJson.size(); x++){
-            System.out.println(convertedToJson.get(x));
-        }
-    }
-    
+    }  
 }
