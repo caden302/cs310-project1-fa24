@@ -120,6 +120,101 @@ public class ClassSchedule {
     }
     
     public String convertJsonToCsvString(JsonObject json) {
+        ClassSchedule cs = new ClassSchedule();
+        JsonObject gotJson = new JsonObject();
+        gotJson = cs.getJson();
+        StringWriter writer = new StringWriter();
+        CSVWriter csvWriter = new CSVWriter(writer, ',', '"', '\\', "\n");        
+        String[] csvData = {CRN_COL_HEADER, SUBJECT_COL_HEADER, NUM_COL_HEADER, DESCRIPTION_COL_HEADER,
+        SECTION_COL_HEADER, TYPE_COL_HEADER, CREDITS_COL_HEADER, START_COL_HEADER, END_COL_HEADER,
+        DAYS_COL_HEADER, WHERE_COL_HEADER, SCHEDULE_COL_HEADER, INSTRUCTOR_COL_HEADER};
+        
+        csvWriter.writeNext(csvData);
+        
+        JsonObject scheduleType = (JsonObject) gotJson.get("scheduletype");
+        JsonObject subject = (JsonObject) gotJson.get("subject");
+        JsonObject course = (JsonObject) gotJson.get("course");
+        JsonArray sectionArray = (JsonArray) gotJson.get("section");
+        
+        ArrayList<String[]> schedTypes = new ArrayList<>();
+        ArrayList<String[]> subjTypes = new ArrayList<>();
+        ArrayList<String[]> courses = new ArrayList<>();
+        ArrayList<String[]> classNums = new ArrayList<>();
+        ArrayList<String[]> sections = new ArrayList<>();
+
+        //System.out.println(gotJson);
+        
+        for(Object key : scheduleType.keySet()){
+            String value = scheduleType.get(key).toString();
+            String[] pair = new String[2];
+            pair[0] = key.toString();
+            pair[1] = value;
+            schedTypes.add(pair);
+        }
+        
+        for(Object key : subject.keySet()){
+            String value = subject.get(key).toString();
+            String[] pair = new String[2];
+            pair[0] = key.toString();
+            pair[1] = value;
+            subjTypes.add(pair);
+        }
+        
+        /*for(Object key : course.keySet()){
+            Object value = course.get(key);
+            JsonObject nestedJson = (JsonObject) value;
+            for(Object nestedKey : nestedJson.keySet()){
+                Object nestedValue = nestedJson.get(nestedKey);
+                JsonObject nestedededJson = (JsonObject) nestedValue;
+                for(Object nestededKey : nestedededJson.keySet()){
+                    String nestedestValue = (String) nestedededJson.get(nestededKey).toString();
+                    String[] keyValuePair = new String[2];
+                    keyValuePair[0] = nestededKey.toString();
+                    keyValuePair[1] = nestedestValue;
+                    courses.add(keyValuePair);
+                }
+            }
+        }*/
+        
+        for (Object sectionObj : sectionArray) {
+            JsonObject section = (JsonObject) sectionObj;
+            String[] pair = new String[9];
+            pair[0] = section.get("crn").toString();
+            pair[1] = (String) section.get("subjectid");
+            pair[2] = (String) section.get("num").toString();
+            pair[3] = (String) section.get("section");
+            pair[4] = (String) section.get("type");
+            pair[5] = (String) section.get("start");
+            pair[6] = (String) section.get("end");
+            pair[7] = (String) section.get("days");
+            pair[8] = (String) section.get("where");
+            sections.add(pair);
+        }
+        
+        ArrayList<String> type = new ArrayList<>();
+        ArrayList<String> typeSpelled = new ArrayList<>();
+
+        for(String[] pair : schedTypes){
+            type.add(pair[0]);
+            typeSpelled.add(pair[1]);
+        }
+        for(String[] pair : subjTypes){
+            //System.out.println("Key: " + pair[0] + ", Value: " + pair[1]);
+        }
+        /*for(String[] pair : courses){
+            System.out.println("Key: " + pair[0] + ", Value: " + pair[1]);
+        }*/
+        /*for(String[] pair : sections){
+            System.out.println("Key: " + pair[0] + ", Value: " + pair[1]);
+        }*/
+        int size = 100;
+        for(int x = 0; x<size; x++){
+            System.out.println(type.get(x));
+        }
+        
+        String csvString = writer.toString();
+        
+        //System.out.println(csvString);
         
         
         return ""; // remove this!
@@ -203,15 +298,5 @@ public class ClassSchedule {
     }
     
     public void test(){
-        ClassSchedule cs = new ClassSchedule();
-        JsonObject gotJson = new JsonObject();
-        JsonObject deserialize = new JsonObject();
-        gotJson = cs.getJson();
-        deserialize = cs.getJson(gotJson.toJson());
         
-        ArrayList<String> csvlist = new ArrayList();
-        
-        System.out.println(deserialize);
-        
-    }  
 }
